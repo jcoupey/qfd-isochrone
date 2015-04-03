@@ -14,10 +14,9 @@ def travel_time(first_lat, first_lon, second_lat, second_lon):
 
   route = r.json()
 
-  total_time = "inf"
-  if route["status"] == 0:
-    total_time = route["route_summary"]["total_time"]
+  if route["status"] != 0:
+    raise Exception("Unfound route")
 
   # Travel time in minutes, rounded to lowest integer
-  return total_time / 60
+  return route["route_summary"]["total_time"] / 60
 
