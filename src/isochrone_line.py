@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+import math, json
 from osrm_request import travel_time
-import math
 
 def midpoint(x1, y1, x2, y2):
   return (x1 + x2)/2, (y1 + y2)/2
@@ -51,11 +51,19 @@ def limit_in_single_direction(lat, lon, minutes, angle):
 lats = []
 lons = []
 
-step_number = 30
+init_lat = 48.85
+init_lon = 2.35
+time = 60
+
+step_number = 40
+
 for step in range(step_number):
   angle = 2 * step * math.pi / step_number
   try:
-    current_lat, current_lon = limit_in_single_direction(48.85, 2.35, 60, angle)
+    current_lat, current_lon = limit_in_single_direction(init_lat,
+                                                         init_lon,
+                                                         time,
+                                                         angle)
   except Exception as e:
     # Ignoring cases where the dichotomic search encounters an unfound
     # route
@@ -63,5 +71,34 @@ for step in range(step_number):
   lats.append(current_lat)
   lons.append(current_lon)
 
-print lats, lons
+
+  geojson_output = {"type": "FeatureCollection",
+                    "features": [
+                      {
+                        "type": "Feature",
+                        "geometry": {
+                          "type": "Polygon",
+                          "coordinates": [
+                            [
+                            ]
+                          ]
+                        },
+                        "properties": {
+                          "name": "Isochrone map",
+                          "desc": str(time) + " minutes from "
+                          + str(init_lat) + "," + str(init_lon)
+                        }
+                      }
+                    ]
+                  }
+  
+  point_number = len(lats)
+  
+  for i in range(point_number + 1):
+    geojson_output["features"][0]["geometry"]["coordinates"][0].append(
+      [lons[i % point_number], lats[i % point_number]])
+
+with open('output_' + str(init_lat) + '_' + str(init_lon)
+          + '_' + str(time) + '.geojson', 'w') as f:
+  json.dump(geojson_output, f, indent = 2)
 
