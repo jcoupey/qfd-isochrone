@@ -48,57 +48,61 @@ def limit_in_single_direction(lat, lon, minutes, angle):
 
   return nearest_point(min_lat, min_lon)
 
-init_lat = 48.85
-init_lon = 2.35
+def get_lines(durations, init_lats, init_lons, step_number):
+  for i in range(len(init_lats)):
+    init_lat = init_lats[i]
+    init_lon = init_lons[i]
+    # print init_lat, init_lon
 
-step_number = 25
-duration = 30
+    for duration in durations:
+      # print duration
+      lats = []
+      lons = []
 
-lats = []
-lons = []
-
-for step in range(step_number):
-  angle = 2 * step * math.pi / step_number
-  try:
-    current_lat, current_lon = limit_in_single_direction(init_lat,
-                                                         init_lon,
-                                                         duration,
-                                                         angle)
-  except Exception as e:
-    # Ignoring cases where the dichotomic search encounters an unfound
-    # route
-    continue
-  lats.append(current_lat)
-  lons.append(current_lon)
+      for step in range(step_number):
+        angle = 2 * step * math.pi / step_number
+        try:
+          current_lat, current_lon = limit_in_single_direction(init_lat,
+                                                               init_lon,
+                                                               duration,
+                                                               angle)
+        except Exception as e:
+          # Ignoring cases where the dichotomic search encounters an unfound
+          # route
+          continue
+        lats.append(current_lat)
+        lons.append(current_lon)
 
 
-  geojson_output = {"type": "FeatureCollection",
-                    "features": [
-                      {
-                        "type": "Feature",
-                        "geometry": {
-                          "type": "Polygon",
-                          "coordinates": [
-                            [
-                            ]
+        geojson_output = {"type": "FeatureCollection",
+                          "features": [
+                            {
+                              "type": "Feature",
+                              "geometry": {
+                                "type": "Polygon",
+                                "coordinates": [
+                                  [
+                                  ]
+                                ]
+                              },
+                              "properties": {
+                                "name": "Isochrone map",
+                                "desc": str(duration) + " minutes from "
+                                + str(init_lat) + "," + str(init_lon)
+                              }
+                            }
                           ]
-                        },
-                        "properties": {
-                          "name": "Isochrone map",
-                          "desc": str(duration) + " minutes from "
-                          + str(init_lat) + "," + str(init_lon)
                         }
-                      }
-                    ]
-                  }
 
-  point_number = len(lats)
+        point_number = len(lats)
 
-  for i in range(point_number + 1):
-    geojson_output["features"][0]["geometry"]["coordinates"][0].append(
-      [lons[i % point_number], lats[i % point_number]])
+        for i in range(point_number + 1):
+          geojson_output["features"][0]["geometry"]["coordinates"][0].append(
+            [lons[i % point_number], lats[i % point_number]])
 
-with open('output_' + str(init_lat) + '_' + str(init_lon)
-          + '_' + str(duration) + '.geojson', 'w') as f:
-  json.dump(geojson_output, f, indent = 2)
+      with open('output_' + str(init_lat) + '_' + str(init_lon)
+                + '_' + str(duration) + '.geojson', 'w') as f:
+        json.dump(geojson_output, f, indent = 2)
 
+if __name__ == "__main__":
+  get_lines([30, 60], [48.85, 45.7529], [2.35, 4.9830], 25)
