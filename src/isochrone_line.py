@@ -79,6 +79,17 @@ def get_lines(durations, init_lats, init_lons, step_number):
                             {
                               "type": "Feature",
                               "geometry": {
+                                "type": "Point",
+                                "coordinates": [
+                                  init_lon,
+                                  init_lat
+                                ]
+                              },
+                              "properties": {}
+                            },
+                            {
+                              "type": "Feature",
+                              "geometry": {
                                 "type": "Polygon",
                                 "coordinates": [
                                   [
@@ -97,7 +108,7 @@ def get_lines(durations, init_lats, init_lons, step_number):
         point_number = len(lats)
 
         for i in range(point_number + 1):
-          geojson_output["features"][0]["geometry"]["coordinates"][0].append(
+          geojson_output["features"][1]["geometry"]["coordinates"][0].append(
             [lons[i % point_number], lats[i % point_number]])
 
       with open('output_' + str(init_lat) + '_' + str(init_lon)
