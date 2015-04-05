@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import math, json
-from osrm_request import travel_time
+from osrm_request import travel_time, nearest_point
 
 def midpoint(x1, y1, x2, y2):
   return (x1 + x2)/2, (y1 + y2)/2
@@ -46,23 +46,23 @@ def limit_in_single_direction(lat, lon, minutes, angle):
       max_lon = middle_lon
       upper_time = middle_time
 
-  return min_lat, min_lon
-
-lats = []
-lons = []
+  return nearest_point(min_lat, min_lon)
 
 init_lat = 48.85
 init_lon = 2.35
-time = 60
 
-step_number = 40
+step_number = 25
+duration = 30
+
+lats = []
+lons = []
 
 for step in range(step_number):
   angle = 2 * step * math.pi / step_number
   try:
     current_lat, current_lon = limit_in_single_direction(init_lat,
                                                          init_lon,
-                                                         time,
+                                                         duration,
                                                          angle)
   except Exception as e:
     # Ignoring cases where the dichotomic search encounters an unfound
@@ -85,20 +85,20 @@ for step in range(step_number):
                         },
                         "properties": {
                           "name": "Isochrone map",
-                          "desc": str(time) + " minutes from "
+                          "desc": str(duration) + " minutes from "
                           + str(init_lat) + "," + str(init_lon)
                         }
                       }
                     ]
                   }
-  
+
   point_number = len(lats)
-  
+
   for i in range(point_number + 1):
     geojson_output["features"][0]["geometry"]["coordinates"][0].append(
       [lons[i % point_number], lats[i % point_number]])
 
 with open('output_' + str(init_lat) + '_' + str(init_lon)
-          + '_' + str(time) + '.geojson', 'w') as f:
+          + '_' + str(duration) + '.geojson', 'w') as f:
   json.dump(geojson_output, f, indent = 2)
 
