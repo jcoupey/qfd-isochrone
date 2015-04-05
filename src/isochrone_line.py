@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import math, json
+import math, json, argparse
 from osrm_request import travel_time, nearest_point
 
 def midpoint(x1, y1, x2, y2):
@@ -52,10 +52,10 @@ def get_lines(durations, init_lats, init_lons, step_number):
   for i in range(len(init_lats)):
     init_lat = init_lats[i]
     init_lon = init_lons[i]
-    # print init_lat, init_lon
+    print init_lat, init_lon
 
     for duration in durations:
-      # print duration
+      print duration
       lats = []
       lons = []
 
@@ -73,47 +73,70 @@ def get_lines(durations, init_lats, init_lons, step_number):
         lats.append(current_lat)
         lons.append(current_lon)
 
-
-        geojson_output = {"type": "FeatureCollection",
-                          "features": [
-                            {
-                              "type": "Feature",
-                              "geometry": {
-                                "type": "Point",
-                                "coordinates": [
-                                  init_lon,
-                                  init_lat
-                                ]
-                              },
-                              "properties": {}
+      geojson_output = {"type": "FeatureCollection",
+                        "features": [
+                          {
+                            "type": "Feature",
+                            "geometry": {
+                              "type": "Point",
+                              "coordinates": [
+                                init_lon,
+                                init_lat
+                              ]
                             },
-                            {
-                              "type": "Feature",
-                              "geometry": {
-                                "type": "Polygon",
-                                "coordinates": [
-                                  [
-                                  ]
+                            "properties": {}
+                          },
+                          {
+                            "type": "Feature",
+                            "geometry": {
+                              "type": "Polygon",
+                              "coordinates": [
+                                [
                                 ]
-                              },
-                              "properties": {
-                                "name": "Isochrone map",
-                                "desc": str(duration) + " minutes from "
-                                + str(init_lat) + "," + str(init_lon)
-                              }
+                              ]
+                            },
+                            "properties": {
+                              "name": "Isochrone map",
+                              "desc": str(duration) + " minutes from "
+                              + str(init_lat) + "," + str(init_lon)
                             }
-                          ]
-                        }
+                          }
+                        ]
+                      }
 
-        point_number = len(lats)
+      point_number = len(lats)
 
-        for i in range(point_number + 1):
-          geojson_output["features"][1]["geometry"]["coordinates"][0].append(
-            [lons[i % point_number], lats[i % point_number]])
+      if point_number == 0:
+        continue
+
+      for i in range(point_number + 1):
+        geojson_output["features"][1]["geometry"]["coordinates"][0].append(
+          [lons[i % point_number], lats[i % point_number]])
 
       with open('output_' + str(init_lat) + '_' + str(init_lon)
                 + '_' + str(duration) + '.geojson', 'w') as f:
         json.dump(geojson_output, f, indent = 2)
 
 if __name__ == "__main__":
-  get_lines([30, 60], [48.85, 45.7529], [2.35, 4.9830], 25)
+  parser = argparse.ArgumentParser(description='Isochrone lines')
+  parser.add_argument('-d', '--duration', nargs = '+', metavar = 'DURATION',
+                      help = 'list of durations')
+  parser.add_argument('-l', '--loc', nargs = '+', metavar = 'LOCS',
+                      help = 'list of locations')
+  parser.add_argument('--steps',
+                      help = 'number of steps for each line',
+                      default = 25)
+  
+  args = parser.parse_args()
+
+  lats = []
+  lons = []
+  
+  for loc in args.loc:
+    coord = loc.split(',')
+    lats.append(float(coord[0]))
+    lons.append(float(coord[1]))
+
+  durations = map(lambda x:int(x), args.duration)
+
+  get_lines(durations, lats, lons, int(args.steps))
