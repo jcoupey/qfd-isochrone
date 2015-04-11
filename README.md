@@ -1,4 +1,4 @@
-# A quick fast and dirty python script to generate rough isochrone lines using [OSRM](http://www.project-osrm.org)
+# A quick, fast and dirty python script to generate rough isochrone lines using [OSRM](http://www.project-osrm.org)
 
 ## Map example
 
@@ -34,7 +34,7 @@ loads of directions to get a rough picture.
 
 ### Dirty?
 
-We just use a bunch of points around _p_ on the map, whose pertinence
+We just use a bunch of points around _p_ on the map, whose relevance
 is determined by OSRM requests. The real thing would be to get into
 the graph structure of the road network and perform some kind of deep
 search.
