@@ -5,7 +5,7 @@
 ![alt text](./img/example.gif "Map picture example.")
 
 The map used to produce this image can be found [here on
-umap](umap.openstreetmap.fr/m/35416/).
+umap](http://umap.openstreetmap.fr/m/35416/).
 
 ## Description
 
